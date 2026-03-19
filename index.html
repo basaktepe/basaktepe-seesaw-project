@@ -17,7 +17,41 @@
     <header>
       <h1>Seesaw Simulation</h1>
     </header>
-    <main></main>
-    <footer></footer>
+
+    <main>
+      <div id="info-panel">
+        <div class="info-panel__item">
+          <span class="info-panel__label">Left Weight</span>
+          <span class="info-panel__value" id="left-weight">0.0 kg</span>
+        </div>
+        <div class="info-panel__item">
+          <span class="info-panel__label">Next Weight</span>
+          <span class="info-panel__value info-panel__value--highlight" id="next-weight">5 kg</span>
+        </div>
+        <div class="info-panel__item">
+          <span class="info-panel__label">Right Weight</span>
+          <span class="info-panel__value" id="right-weight">0.0 kg</span>
+        </div>
+        <div class="info-panel__item">
+          <span class="info-panel__label">Tilt Angle</span>
+          <span class="info-panel__value" id="tilt-angle">0.0°</span>
+        </div>
+      </div>
+
+      <div id="seesaw-card">
+        <div id="seesaw">
+          <div id="seesaw-board-wrapper">
+            <div id="seesaw-board"></div>
+          </div>
+          <div id="seesaw-base"></div>
+        </div>
+      </div>
+
+      <button id="reset-btn">Reset</button>
+    </main>
+
+    <footer>
+      <p>Click on the plank to drop objects!</p>
+    </footer>
   </body>
 </html>
