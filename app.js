@@ -6,6 +6,7 @@ const rightWeightEl = document.getElementById("right-weight");
 const nextWeightEl = document.getElementById("next-weight");
 const tiltAngleEl = document.getElementById("tilt-angle");
 const resetBtn = document.getElementById("reset-btn");
+const logList = document.getElementById("activity-list");
 // Returns the center point of the board
 function getCenter() {
   return board.offsetWidth / 2;
@@ -83,7 +84,10 @@ function loadState() {
   state.objects.forEach((obj) => objects.push(obj));
   nextWeight = state.nextWeight;
 
-  objects.forEach((obj) => placeBall(obj.dropPoint, obj.weight));
+  objects.forEach((obj) => {
+    placeBall(obj.dropPoint, obj.weight);
+    addLog(obj.weight, obj.side, obj.distance);
+  });
   tiltBoard();
   updateUI();
 }
@@ -140,10 +144,18 @@ function handleSeesawClick(e) {
 
   objects.push({ weight, distance, side, dropPoint });
   createBall(dropPoint, weight, () => {
+    addLog(weight, side, distance);
     tiltBoard();
     updateUI();
     saveState();
   });
+}
+
+// Activity log entry
+function addLog(weight, side, distance) {
+  const li = document.createElement("li");
+  li.textContent = `${weight}kg dropped on ${side} side at ${distance}px from center`;
+  logList.prepend(li);
 }
 
 // Clears all objects, resets board and UI, removes balls from DOM
@@ -152,13 +164,36 @@ function handleReset() {
   nextWeight = generateWeight();
 
   document.querySelectorAll(".seesaw-ball").forEach((ball) => ball.remove());
+  logList.innerHTML = "";
 
   boardWrapper.style.transform = "rotate(0deg)";
   saveState();
   updateUI();
 }
 
+//  Distance grid
+function renderGrid() {
+  const center = getCenter();
+  const step = 50;
+
+  for (let offset = step; offset <= center; offset += step) {
+    [center - offset, center + offset].forEach((pos) => {
+      const tick = document.createElement("div");
+      tick.className = "grid-tick";
+      tick.style.left = pos + "px";
+      board.appendChild(tick);
+
+      const label = document.createElement("div");
+      label.className = "grid-label";
+      label.style.left = pos + "px";
+      label.textContent = offset;
+      board.appendChild(label);
+    });
+  }
+}
+
 // Restore previous state or start fresh
+renderGrid();
 loadState();
 nextWeightEl.textContent = nextWeight + " kg";
 
