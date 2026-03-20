@@ -5,12 +5,15 @@ const leftWeightEl = document.getElementById("left-weight");
 const rightWeightEl = document.getElementById("right-weight");
 const nextWeightEl = document.getElementById("next-weight");
 const tiltAngleEl = document.getElementById("tilt-angle");
-// Returns the center point of the board 
+
+// Returns the center point of the board
 function getCenter() {
   return board.offsetWidth / 2;
 }
 
-// Stores dropped objects: { weight, distance, side }
+const STORAGE_KEY = "seesawState";
+
+// Stores dropped objects: { weight, distance, side, dropPoint }
 const objects = [];
 let nextWeight = generateWeight();
 
@@ -65,6 +68,43 @@ function updateUI() {
   nextWeightEl.textContent = nextWeight + " kg";
 }
 
+// Saves current state to localStorage
+function saveState() {
+  const state = { objects, nextWeight };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// Loads saved state from localStorage and restores balls on the board
+function loadState() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+
+  const state = JSON.parse(saved);
+  state.objects.forEach((obj) => objects.push(obj));
+  nextWeight = state.nextWeight;
+
+  objects.forEach((obj) => placeBall(obj.dropPoint, obj.weight));
+  tiltBoard();
+  updateUI();
+}
+
+// Places a ball directly on the board without animation
+function placeBall(dropPoint, weight) {
+  const ball = document.createElement("div");
+  const size = 18 + weight * 4;
+  const boardHeight = 14;
+
+  ball.className = "seesaw-ball";
+  ball.textContent = weight;
+  ball.style.width = size + "px";
+  ball.style.height = size + "px";
+  ball.style.backgroundColor = getColorByWeight(weight);
+  ball.style.left = dropPoint - size / 2 + "px";
+  ball.style.bottom = boardHeight + "px";
+
+  boardWrapper.appendChild(ball);
+}
+
 // Creates a ball element that falls from the top to the board, calls onLand when it arrives
 function createBall(dropPoint, weight, onLand) {
   const ball = document.createElement("div");
@@ -89,7 +129,6 @@ function createBall(dropPoint, weight, onLand) {
   });
 }
 
-
 function handleSeesawClick(e) {
   const boardRect = board.getBoundingClientRect();
   const center = getCenter();
@@ -99,14 +138,16 @@ function handleSeesawClick(e) {
   const weight = nextWeight;
   nextWeight = generateWeight();
 
-  objects.push({ weight, distance, side });
+  objects.push({ weight, distance, side, dropPoint });
   createBall(dropPoint, weight, () => {
     tiltBoard();
     updateUI();
+    saveState();
   });
 }
 
-// Initialize UI with first next weight
+// Restore previous state or start fresh
+loadState();
 nextWeightEl.textContent = nextWeight + " kg";
 
 // Event listener for seesaw card clicks
