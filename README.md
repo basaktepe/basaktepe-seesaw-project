@@ -23,6 +23,8 @@ angle = Math.max(-30, Math.min(30, (rightTorque - leftTorque) / 10));
 7. **Falling animation** - Balls fall from the top of the card to the board before the seesaw tilts
 8. **LocalStorage persistence** - Saving and restoring state so progress survives page refresh
 9. **Reset functionality** - Clearing all objects, resetting the board, and updating localStorage
+10. **Distance grid** - Visual tick marks and labels on the board showing distance from center at every 50px
+11. **Activity log** - A scrollable log panel that records each drop with weight, side, and distance, persisted via localStorage
 
 ## Design Decisions
 
@@ -33,6 +35,8 @@ angle = Math.max(-30, Math.min(30, (rightTorque - leftTorque) / 10));
 - **Ball size varies by weight**: Heavier objects render larger (`18 + weight * 4` px). This gives immediate visual feedback about an object's weight before reading the label, making the simulation more intuitive.
 
 - **DOM manipulation over canvas**: The requirement explicitly prohibits canvas. DOM elements with CSS transitions provide smooth animations, easy event handling, and straightforward state management without a render loop.
+
+- **Activity log synced with `onLand`**: Log entries are added inside the same `transitionend` callback as tilt and UI updates. This ensures the log reflects reality — entries only appear after the ball has actually landed, not while it's still falling.
 
 ## Trade-offs & Limitations
 
