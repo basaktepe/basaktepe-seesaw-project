@@ -5,7 +5,7 @@ const leftWeightEl = document.getElementById("left-weight");
 const rightWeightEl = document.getElementById("right-weight");
 const nextWeightEl = document.getElementById("next-weight");
 const tiltAngleEl = document.getElementById("tilt-angle");
-
+const resetBtn = document.getElementById("reset-btn");
 // Returns the center point of the board
 function getCenter() {
   return board.offsetWidth / 2;
@@ -146,9 +146,22 @@ function handleSeesawClick(e) {
   });
 }
 
+// Clears all objects, resets board and UI, removes balls from DOM
+function handleReset() {
+  objects.length = 0;
+  nextWeight = generateWeight();
+
+  document.querySelectorAll(".seesaw-ball").forEach((ball) => ball.remove());
+
+  boardWrapper.style.transform = "rotate(0deg)";
+  saveState();
+  updateUI();
+}
+
 // Restore previous state or start fresh
 loadState();
 nextWeightEl.textContent = nextWeight + " kg";
 
-// Event listener for seesaw card clicks
+// Event listeners
 seesawCard.addEventListener("click", handleSeesawClick);
+resetBtn.addEventListener("click", handleReset);
