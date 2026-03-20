@@ -1,8 +1,13 @@
 const seesawCard = document.getElementById("seesaw-card");
 const board = document.getElementById("seesaw-board");
 const boardWrapper = document.getElementById("seesaw-board-wrapper");
-const BOARD_WIDTH = board.offsetWidth;
-const CENTER = BOARD_WIDTH / 2;
+// Returns the center point of the board 
+function getCenter() {
+  return board.offsetWidth / 2;
+}
+
+// Stores dropped objects: { weight, distance, side }
+const objects = [];
 
 // Returns a color based on weight: light=blue, medium=purple, heavy=red
 function getColorByWeight(weight) {
@@ -14,6 +19,28 @@ function getColorByWeight(weight) {
 // Generates a random weight between 1 and 10
 function generateWeight() {
   return Math.floor(Math.random() * 10) + 1;
+}
+
+// Calculates torque for each side and returns the tilt angle (capped at ±30°)
+function calculateAngle() {
+  let leftTorque = 0;
+  let rightTorque = 0;
+
+  objects.forEach((obj) => {
+    if (obj.side === "left") {
+      leftTorque += obj.weight * obj.distance;
+    } else {
+      rightTorque += obj.weight * obj.distance;
+    }
+  });
+
+  return Math.max(-30, Math.min(30, (rightTorque - leftTorque) / 10));
+}
+
+// Applies the tilt angle to the board wrapper
+function tiltBoard() {
+  const angle = calculateAngle();
+  boardWrapper.style.transform = `rotate(${angle}deg)`;
 }
 
 // Creates a ball element that falls from the top of the seesaw area to the board
@@ -40,16 +67,18 @@ function createBall(dropPoint, weight) {
   });
 }
 
+
 function handleSeesawClick(e) {
   const boardRect = board.getBoundingClientRect();
-  const dropPoint = Math.max(0, Math.min(BOARD_WIDTH, e.clientX - boardRect.left));
-  const distance = Math.round(Math.abs(dropPoint - CENTER));
-  const side = dropPoint < CENTER ? "left" : "right";
+  const center = getCenter();
+  const dropPoint = Math.max(0, Math.min(board.offsetWidth, e.clientX - boardRect.left));
+  const distance = Math.round(Math.abs(dropPoint - center));
+  const side = dropPoint < center ? "left" : "right";
   const weight = generateWeight();
 
+  objects.push({ weight, distance, side });
   createBall(dropPoint, weight);
-
-  console.log(`Object dropped on the ${side} side, ${distance}px from center, weight: ${weight}kg`);
+  tiltBoard();
 }
 
 // Event listener for seesaw card clicks
