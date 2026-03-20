@@ -65,14 +65,12 @@ function updateUI() {
   nextWeightEl.textContent = nextWeight + " kg";
 }
 
-// Creates a ball element that falls from the top of the seesaw area to the board
-function createBall(dropPoint, weight) {
-  const seesaw = document.getElementById("seesaw");
+// Creates a ball element that falls from the top to the board, calls onLand when it arrives
+function createBall(dropPoint, weight, onLand) {
   const ball = document.createElement("div");
   const size = 18 + weight * 4;
-  const wrapperBottom = 50;
   const boardHeight = 14;
-  const landingBottom = wrapperBottom + boardHeight;
+  const wrapperHeight = boardWrapper.offsetHeight;
 
   ball.className = "seesaw-ball";
   ball.textContent = weight;
@@ -80,12 +78,14 @@ function createBall(dropPoint, weight) {
   ball.style.height = size + "px";
   ball.style.backgroundColor = getColorByWeight(weight);
   ball.style.left = dropPoint - size / 2 + "px";
-  ball.style.bottom = seesaw.offsetHeight + "px";
+  ball.style.bottom = wrapperHeight + "px";
 
-  seesaw.appendChild(ball);
+  ball.addEventListener("transitionend", () => onLand(), { once: true });
+
+  boardWrapper.appendChild(ball);
 
   requestAnimationFrame(() => {
-    ball.style.bottom = landingBottom + "px";
+    ball.style.bottom = boardHeight + "px";
   });
 }
 
@@ -100,9 +100,10 @@ function handleSeesawClick(e) {
   nextWeight = generateWeight();
 
   objects.push({ weight, distance, side });
-  createBall(dropPoint, weight);
-  tiltBoard();
-  updateUI();
+  createBall(dropPoint, weight, () => {
+    tiltBoard();
+    updateUI();
+  });
 }
 
 // Initialize UI with first next weight
